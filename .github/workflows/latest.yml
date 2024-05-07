@@ -32,6 +32,7 @@ jobs:
         file: Dockerfile
         platforms: ${{ env.ARCH_PLATFORM }}
         push: false
+        load: true
         tags: ${{ github.repository }}:latest
 
     - name: Test the docker container runs.

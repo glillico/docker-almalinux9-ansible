@@ -8,6 +8,9 @@ on:
   # schedule:
   #   - cron: '20 2 * * 1'
 
+end:
+  ARCH_PLATFORM: "linux/amd64,linux/arm64"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,8 +19,20 @@ jobs:
     - name: Check out git repository.
       uses: actions/checkout@v2
 
-    - name: Build the docker container
-      run: docker build -t docker-test .
+    - name: Setup QEMU.
+      uses: docker/setup-qemu-action@v1
+
+    - name: Setup buildx.
+      uses: docker/setup-buildx-action@v1
+    
+    - name: Build and push.
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: Dockerfile
+        platforms: $ARCH_PLATFORM
+        push: false
+        tags: ${{ github.repository }}:latest
 
     - name: Test the docker container runs.
       run: docker run --name docker-container -d --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host docker-test
@@ -55,6 +70,6 @@ jobs:
       with:
         context: ./
         file: Dockerfile
-        platforms: linux/amd64,linux/arm64
+        platforms: $ARCH_PLATFORM
         push: true
         tags: ${{ github.repository }}:latest
